@@ -54,11 +54,11 @@ class Maze:
 
 
     # Removing walls between the neighboring cells 
-    def remove_walls(self, current_cell, next_cell, direction, oppposite_direction): 
+    def remove_walls(self, current_cell, next_cell, direction, opposite_direction): 
         # Basic explanation of how this works: 
         # If there is a wall to the east but then a new cell is generated there the wall betweent the two cells will be removed 
         current_cell.walls[direction] = False  # Remove the wall in the specified direction for the current cell 
-        next_cell.walls[oppposite_direction] = False  # Remove the wall in the opposite direction for the next cell
+        next_cell.walls[opposite_direction] = False  # Remove the wall in the opposite direction for the next cell
 
     # Generating our maze using randomized the depth-first search algorithm 
     def generate_maze(self): 
@@ -103,36 +103,36 @@ class Maze:
     # TESTING PURPOSES ONLY THE FRONT END WILL GENERATE THIS IN THE FUTURE 
     def print_maze(self):
 
-    # Draw the top wall
-    print("+" + "---+" * self.width)
+        # Draw the top wall
+        print("+" + "---+" * self.width)
 
-    for row in self.grid:
+        for row in self.grid:
 
-        # Start the left side of this row
-        middle_line = "|"
-        bottom_line = "+"
+            # Start the left side of this row
+            middle_line = "|"
+            bottom_line = "+"
 
-        # Go through every cell in THIS row
-        for cell in row:
+            # Go through every cell in THIS row
+            for cell in row:
 
-            # Draw the inside of the cell
-            middle_line += "   "
+                # Draw the inside of the cell
+                middle_line += "   "
 
-            # Draw the east wall if it exists
-            if cell.walls["E"]:
-                middle_line += "|"
-            else:
-                middle_line += " "
+                # Draw the east wall if it exists
+                if cell.walls["E"]:
+                    middle_line += "|"
+                else:
+                    middle_line += " "
 
-            # Draw the south wall if it exists
-            if cell.walls["S"]:
-                bottom_line += "---+"
-            else:
-                bottom_line += "   +"
+                # Draw the south wall if it exists
+                if cell.walls["S"]:
+                    bottom_line += "---+"
+                else:
+                    bottom_line += "   +"
 
-        # Print this completed row
-        print(middle_line)
-        print(bottom_line)
+            # Print this completed row
+            print(middle_line)
+            print(bottom_line)
 
 
 # This code willonly runs when maze.py itself is executed 
