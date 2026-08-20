@@ -1,5 +1,5 @@
 import random 
-
+from pathfinding import find_shortest_path
 
 # Represents the individual cells in the maze
 class Cell: 
@@ -98,9 +98,72 @@ class Maze:
             # No unvisted cells remain
             else: 
                 break 
+    # Checks whether every cell in the maze can be reached.
+    def is_fully_connected(self):
 
-    # Prints a version of the maze inside of the terminal 
-    # TESTING PURPOSES ONLY THE FRONT END WILL GENERATE THIS IN THE FUTURE 
+        start_cell = self.grid[0][0]
+
+        visited = set()
+        stack = [start_cell]
+
+        while stack:
+
+            current_cell = stack.pop()
+
+            position = (
+                current_cell.x,
+                current_cell.y
+            )
+
+            if position in visited:
+                continue
+
+            visited.add(position)
+
+            # Check every open direction.
+            if not current_cell.walls["N"]:
+                north = self.get_cell(
+                    current_cell.x,
+                    current_cell.y - 1
+                )
+
+                if north is not None:
+                    stack.append(north)
+
+            if not current_cell.walls["S"]:
+                south = self.get_cell(
+                    current_cell.x,
+                    current_cell.y + 1
+                )
+
+                if south is not None:
+                    stack.append(south)
+
+            if not current_cell.walls["E"]:
+                east = self.get_cell(
+                    current_cell.x + 1,
+                    current_cell.y
+                )
+
+                if east is not None:
+                    stack.append(east)
+
+            if not current_cell.walls["W"]:
+                west = self.get_cell(
+                    current_cell.x - 1,
+                    current_cell.y
+                )
+
+                if west is not None:
+                    stack.append(west)
+
+        total_cells = self.width * self.height
+
+        return len(visited) == total_cells
+
+
+        # Prints a version of the maze inside of the terminal 
+        # TESTING PURPOSES ONLY THE FRONT END WILL GENERATE THIS IN THE FUTURE 
     def print_maze(self):
 
         # Draw the top wall
@@ -111,10 +174,8 @@ class Maze:
             # Start the left side of this row
             middle_line = "|"
             bottom_line = "+"
-
             # Go through every cell in THIS row
             for cell in row:
-
                 # Draw the inside of the cell
                 middle_line += "   "
 
@@ -144,4 +205,21 @@ if __name__ == "__main__":
     )
 
     maze.generate_maze()
+    start_cell = maze.get_cell(0,0)
+    end_cell = maze.get_cell(19,19)
+
+    path = find_shortest_path( 
+        maze, 
+        start_cell, 
+        end_cell
+    )
+    if path is None: 
+        print("ERROR: No path was found")
+    else: 
+        print(f"Path Length: {len(path) -1}")
+        print(path)
     maze.print_maze()
+    if maze.is_fully_connected(): 
+        print("Maze is fully connected.")
+    else: 
+        print("ERROR: Maze contains unreachable cells ") 
