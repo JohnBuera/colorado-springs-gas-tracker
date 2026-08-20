@@ -1,7 +1,6 @@
 import random 
 from pathfinding import find_shortest_path
-from station_generator import generate_station_location
-
+from station_generator import generate_stations
 # Represents the individual cells in the maze
 class Cell: 
     def __init__(self, x, y): 
@@ -217,6 +216,16 @@ if __name__ == "__main__":
     maze.generate_maze()
     start_cell = maze.get_cell(0,0)
     end_cell = maze.get_cell(19,19)
+
+    stations = generate_stations(
+    maze,
+    station_count=10
+    )
+
+    for station in stations:
+        print(station)
+
+
 
     path = find_shortest_path( 
         maze, 
