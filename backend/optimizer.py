@@ -306,6 +306,6 @@ def get_available_stations (
                 "drive_minutes": travel_data["drive_minutes"],
                 "fuel_used_gallons": travel_data["fuel_used_gallons"],
                 "fuel_at_station":cost_data["fuel_at_station"]
-                "gallons_to_fill_"
+                # "gallons_to_fill_"
             }
         )
