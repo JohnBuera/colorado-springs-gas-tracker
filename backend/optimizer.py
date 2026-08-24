@@ -143,3 +143,169 @@ def calcultate_max_search_units(
 
 # Runs a single Breadth-First Search from the users location 
 # Distacnes store the shortest route to every discovered cell
+def build_distance_map(
+        maze,
+        user_cell, 
+        max_search_units
+): 
+    distances = { 
+        user_cell: 0
+    }
+
+    queue = deque(
+        [user_cell]
+
+    )
+
+    while queue: 
+        current_cell = queue.popleft()
+
+        current_distance = ( distances[current_cell])
+
+        # Don't search beyond the users max range 
+        if current_distance >= max_search_units: 
+            continue
+
+        neighbors = get_reachable_neighbors(
+            maze,
+            current_cell
+        )
+
+        for neighbor in neighbors: 
+            #BFS guarentees the first visit will be the shortest paath available
+            if neighbor in distances: 
+                continue
+            distances[neighbor] = ( 
+                current_distance+1 
+            )
+            queue.append(neighbor)
+
+    return distances
+
+###################################################
+# STATION TRAVEL CALCULATIONS 
+###################################################
+
+def calculate_station_travel( 
+        distance_units, 
+        mpg, 
+        miles_per_unit,
+        minutes_per_unit
+): 
+    distance_miles = ( 
+        distance_units * miles_per_unit
+    )
+
+    drive_minutes = ( 
+        distance_units * minutes_per_unit
+    )
+
+    fuel_used_gallons = ( 
+        distance_miles / mpg
+    )
+
+    return{ 
+        "distance_units":  distance_units, 
+        "distance_miles": distance_miles, 
+        "drive_minutes": drive_minutes, 
+        "fuel_used_gallons": fuel_used_gallons
+    }
+
+
+#################################################
+# CALCULATE REAL STATION COSTS ^3^
+#################################################
+
+def calculate_station_cost(
+        station_price, 
+        fuel_remaining_gallons, 
+        tank_capacity_gallons, 
+        fuel_used_gallons
+): 
+    fuel_at_station = (fuel_remaining_gallons - fuel_used_gallons) 
+    fuel_at_station = max(fuel_at_station,0)    # Safety against tiny floating point error 
+
+    gallons_to_fill = ( 
+        tank_capacity_gallons - fuel_at_station
+    )
+
+    purchase_cost = (gallons_to_fill * station_price)
+
+    return{
+        "fuel_at_station": fuel_at_station, 
+        "gallons_to_fill": gallons_to_fill, 
+        "purchase_cost": purchase_cost
+    }
+
+#################################################
+# BUILDING AVAILABLE STATION LIST
+#################################################
+
+def get_available_stations ( 
+        stations, 
+        distance_map, 
+        requested_fuel_type, 
+        fuel_remaining_gallons, 
+        tank_capacity_gallons, 
+        mpg,
+        miles_per_unit,
+        minutes_per_unit
+): 
+    available_stations = []
+    for station in stations: 
+        station_cell = station.get("cell")
+
+        # stations does not have a usable map location 
+        if station_cell is None: 
+            continue
+
+        # Station is outside the reachable BFS area
+        if station_cell not in distance_map: 
+            continue
+        
+
+        fuel_key = get_station_fuel_key(station, requested_fuel_type)
+
+        # Station doesnt carry the requested fuel
+        if fuel_key is None: 
+            continue
+
+        station_price = ( 
+            station["prices"][fuel_key]
+        )
+
+
+        distance_units = (distance_map[station_cell])
+
+        travel_data = calculate_station_travel( 
+            distance_units, 
+            mpg, 
+            miles_per_unit, 
+            minutes_per_unit
+        )
+
+        # Vehicle needs to have enought fuel to get there 
+        if (travel_data["fuel_used_gallons"] > fuel_remaining_gallons): 
+            continue
+
+        cost_data = calculate_station_cost(
+            station_price, 
+            fuel_remaining_gallons, 
+            tank_capacity_gallons, 
+            travel_data["fuel_used_gallons"]
+        )
+
+
+        available_stations.append( 
+            {
+                "station": station, 
+                "fuel_type": fuel_key, 
+                "price_per_gallon": station_price, 
+                "distance_units": travel_data["distance_units"],
+                "distance_miles":travel_data["distance_miles"],
+                "drive_minutes": travel_data["drive_minutes"],
+                "fuel_used_gallons": travel_data["fuel_used_gallons"],
+                "fuel_at_station":cost_data["fuel_at_station"]
+                "gallons_to_fill_"
+            }
+        )
