@@ -26,24 +26,24 @@ class Station(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     # Station name
-    name = Column(String, unique=True, index=True) 
+    name = Column(String, index=True, nullable = False) 
 
     # Address of the station 
-    address = Column(String, unique=True, index=True)
+    address = Column(String, unique=True, index=True, nullable = False)
 
 
     # Creating a relationship between this stations and all gas price records that will belong to it 
     prices = relationship("GasPrice", back_populates="station")
 
-    # This class will represent the gas_prices table 
-    class GasPrice(Base): 
-        __tablename__ = "gas_prices"
+# This class will represent the gas_prices table 
+class GasPrice(Base): 
+    __tablename__ = "gas_prices"
 
-        id = Column(Integer, primary_key=True, index=True)
-        station_id = Column(Integer, ForeignKey("stations.id"), nullable=False )
-        fuel_type = Column(String, nullable=False)
-        price = Column(Float, nullable=False)
-        # Stores when this gas price was recorded
-        observed_at = Column(DateTime(timezone=True), default=lambda:datetime.now(UTC))
-        station = relationship("Station", back_populates="prices")
+    id = Column(Integer, primary_key=True, index=True)
+    station_id = Column(Integer, ForeignKey("stations.id"), nullable=False )
+    fuel_type = Column(String, nullable=False)
+    price = Column(Float, nullable=False)
+    # Stores when this gas price was recorded
+    observed_at = Column(DateTime(timezone=True), default=lambda:datetime.now(UTC))
+    station = relationship("Station", back_populates="prices")
         

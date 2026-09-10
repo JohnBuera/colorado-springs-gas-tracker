@@ -12,10 +12,15 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # What database is called 
 # FREEDOM is the password (AOT Reference) >:3
 
-DATABASE_URL = "postgresql://postgres:FREEDOM@localhost:5432/gas_tracker"
+DATABASE_URL = "sqlite:///./gas_tracker.db"
 
 # Creating teh SQLAlchemy engine 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    connect_args = {"check_same_thread": False})
+
+
+
 
 
 # Create a factor for database sessions 
