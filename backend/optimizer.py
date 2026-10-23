@@ -349,6 +349,3 @@ def optimize_stations(
         "route": route,
         "note": "Travel distances are simulated maze distances, not real roads.",
     }
-
-            }
-        )
