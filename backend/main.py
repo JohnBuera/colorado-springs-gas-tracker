@@ -9,11 +9,20 @@
 #  return the latest price for each fuel type, as well as the average price, cheapest station, and most expensive station for each fuel type.
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from backend.database import engine
 from backend import models, services
 from backend.data import Stations
 
 app = FastAPI()
+
+# This lets our frontend get prices from the backend on a different port.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 # Looks at the models "Station" and "GasPrice"
 models.Base.metadata.create_all(bind=engine)
