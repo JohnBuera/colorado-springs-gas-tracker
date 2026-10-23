@@ -1,6 +1,6 @@
 import random 
-from pathfinding import find_shortest_path
-from station_generator import generate_stations
+from backend.pathfinding import find_shortest_path
+from backend.station_generator import generate_stations
 # Represents the individual cells in the maze
 class Cell: 
     def __init__(self, x, y): 
@@ -169,15 +169,6 @@ class Maze:
         # Draw the top wall
         print("+" + "---+" * self.width)
 
-        station_cells = generate_station_location( 
-            maze, station_count= 10 
-        )
-        print("Gas Station Locations: ")
-        for station_cell in station_cells: 
-            print(
-                station_cells.x 
-                station_cells.y 
-            )
         for row in self.grid:
 
             # Start the left side of this row

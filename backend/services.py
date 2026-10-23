@@ -28,7 +28,7 @@ def find_most_expensive_station(available_stations, fuel_type):
 
 
 # Calculates the average price for a given fuel type across all stations.
-def calculate_average_price(fuel_type, Stations): 
+def calculate_average_price(Stations, fuel_type): 
     prices = [ 
         station["prices"][fuel_type] 
         for station in Stations 

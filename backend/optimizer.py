@@ -24,7 +24,7 @@
 from collections import deque
 import math 
 
-from pathfinding import get_reachable_neighbors
+from backend.pathfinding import get_reachable_neighbors, find_shortest_path
 
 #------------------------------------------------------
 # FUEL TYPE NORMALIZATION 
@@ -45,7 +45,7 @@ def get_station_fuel_key(
     prices = station.get("prices", {})
 
     for fuel_name in prices: 
-        if normalize_fuel_type(fuel_name) == requested_fuel_type: 
+        if normalize_fuel_type(fuel_name) == requested_fuel: 
             return fuel_name
 
     # Just incase the station doesnt carry the requested fuel 
@@ -148,8 +148,8 @@ def build_distance_map(
         user_cell, 
         max_search_units
 ): 
-    distances = { 
-        user_cell: 0
+    distances = {
+        (user_cell.x, user_cell.y): 0
     }
 
     queue = deque(
@@ -160,7 +160,7 @@ def build_distance_map(
     while queue: 
         current_cell = queue.popleft()
 
-        current_distance = ( distances[current_cell])
+        current_distance = distances[(current_cell.x, current_cell.y)]
 
         # Don't search beyond the users max range 
         if current_distance >= max_search_units: 
@@ -173,11 +173,10 @@ def build_distance_map(
 
         for neighbor in neighbors: 
             #BFS guarentees the first visit will be the shortest paath available
-            if neighbor in distances: 
+            key = (neighbor.x, neighbor.y)
+            if key in distances:
                 continue
-            distances[neighbor] = ( 
-                current_distance+1 
-            )
+            distances[key] = current_distance + 1
             queue.append(neighbor)
 
     return distances
@@ -305,7 +304,51 @@ def get_available_stations (
                 "distance_miles":travel_data["distance_miles"],
                 "drive_minutes": travel_data["drive_minutes"],
                 "fuel_used_gallons": travel_data["fuel_used_gallons"],
-                "fuel_at_station":cost_data["fuel_at_station"]
-                # "gallons_to_fill_"
+                "fuel_at_station": cost_data["fuel_at_station"],
+                "gallons_to_fill": cost_data["gallons_to_fill"],
+                "purchase_cost": cost_data["purchase_cost"],
+            }
+        )
+
+    return available_stations
+
+
+def optimize_stations(
+    maze, user_cell, stations, requested_fuel_type,
+    fuel_remaining_gallons, tank_capacity_gallons, mpg,
+    max_drive_minutes, miles_per_unit=0.1, minutes_per_unit=0.25
+):
+    """Rank stations in the *simulated maze*, not real city road routes."""
+    validate_user_inputs(
+        user_cell, fuel_remaining_gallons, tank_capacity_gallons,
+        mpg, max_drive_minutes, miles_per_unit, minutes_per_unit
+    )
+    max_units = calcultate_max_search_units(
+        fuel_remaining_gallons, mpg, max_drive_minutes,
+        miles_per_unit, minutes_per_unit
+    )
+    distances = build_distance_map(maze, user_cell, max_units)
+    options = get_available_stations(
+        stations, distances, requested_fuel_type, fuel_remaining_gallons,
+        tank_capacity_gallons, mpg, miles_per_unit, minutes_per_unit
+    )
+    if not options:
+        return {"best": None, "nearest": None, "cheapest_pump": None, "ranked": []}
+
+    ranked = sorted(options, key=lambda s: (s["purchase_cost"], s["drive_minutes"]))
+    nearest = min(options, key=lambda s: (s["distance_units"], s["purchase_cost"]))
+    cheapest = min(options, key=lambda s: (s["price_per_gallon"], s["drive_minutes"]))
+    best = ranked[0]
+    station_x, station_y = best["station"]["cell"]
+    route = find_shortest_path(maze, user_cell, maze.get_cell(station_x, station_y))
+    return {
+        "best": best,
+        "nearest": nearest,
+        "cheapest_pump": cheapest,
+        "ranked": ranked,
+        "route": route,
+        "note": "Travel distances are simulated maze distances, not real roads.",
+    }
+
             }
         )

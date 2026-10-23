@@ -9,10 +9,9 @@
 #  return the latest price for each fuel type, as well as the average price, cheapest station, and most expensive station for each fuel type.
 
 from fastapi import FastAPI
-from database import engine
-import models 
-from data import Stations
-import services
+from backend.database import engine
+from backend import models, services
+from backend.data import Stations
 
 app = FastAPI()
 

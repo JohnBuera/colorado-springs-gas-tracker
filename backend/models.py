@@ -16,7 +16,7 @@ from datetime import datetime, UTC
 
 # Importing the base class that we created inside of database.py
 # Every database model will inherit from this base class
-from database import Base
+from backend.database import Base
 
 class Station(Base):
     # Setting the actual table name 
